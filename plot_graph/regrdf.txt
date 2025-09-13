@@ -1,0 +1,76 @@
+def generate_graph_frame(tracks,img):
+    
+    # Create the plot
+    fig, ax = plt.subplots(figsize=(8, 6))
+    # Set plot limits
+    ax.set_xlim(-5, 112)
+    ax.set_ylim(-2, 69)
+    
+    # Set background image
+    ax.imshow(img, extent=[-5, 112, -2, 69], aspect='equal')
+
+    stub_path = 'stubs/data2.pkl'
+    if stub_path is not None and os.path.exists(stub_path):
+        with open(stub_path,'rb') as f:
+            data2 = pickle.load(f)
+            
+    output_video_frames=[]
+    for frame_num, track in enumerate(tracks['players']):
+            print(frame_num,"\n")
+            for track_id, track_info in track.items():
+                if data2['players'][frame_num][track_id]['position_transformed'] is not None :
+                    x, y = data2['players'][frame_num][track_id]['position_transformed']
+                    if frame_num > 0 and frame_num < 100:
+                        x=x+46.7
+                    if frame_num > 100 and frame_num < 350:
+                        x=x+23.4
+                    if frame_num > 350 and frame_num < 500:
+                         x=x+40.84
+                    if frame_num > 500 and frame_num < 800:
+                        x=x+52.5
+                         
+                    ax.plot(x, y, 'o', markersize=15, markerfacecolor='blue', markeredgewidth=2, markeredgecolor='black')
+
+            # Remove axis labels and ticks
+            ax.set_xticks([])
+            ax.set_yticks([])
+            ax.set_xlabel("")
+            ax.set_ylabel("")
+
+            # Save the plot as an image in memory
+            fig.canvas.draw()
+            frame1 = np.frombuffer(fig.canvas.buffer_rgba(), dtype=np.uint8)
+            frame1 = frame1.reshape(fig.canvas.get_width_height()[::-1] + (4,))
+
+            # Drop the alpha channel to convert to RGB
+            frame1 = frame1[:, :, :3]
+
+            plt.close(fig)  
+            output_video_frames.append(frame1)
+
+    return output_video_frames
+
+
+# Background image
+background_image = "D:\TY__sem-1\EDI-2\plot_graph\Field.jpg"  # Path to your background image
+
+# Load the background image
+img = mpimg.imread(background_image)
+stub_path = 'stubs/data.pkl'
+if stub_path is not None and os.path.exists(stub_path):
+    with open(stub_path,'rb') as f:
+        tracks = pickle.load(f)
+print("123\n")
+output_video_frames = []
+
+output_video_frames =  generate_graph_frame(tracks,img)
+
+    
+    
+save_video(output_video_frames , 'D:/TY__sem-1/EDI-2/Output/Plot2.avi')
+
+
+
+
+# # Show the plot
+# plt.show()
